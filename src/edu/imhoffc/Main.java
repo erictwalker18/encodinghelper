@@ -14,7 +14,6 @@ public class Main {
         System.out.println("Hey "+name);
         System.out.println();
         System.out.println();
-
     }
 
 }
