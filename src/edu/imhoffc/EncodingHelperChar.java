@@ -54,7 +54,11 @@ public class EncodingHelperChar {
      * @return the U+ string for this character
      */
     public String toCodePointString() {
-        return "U+"+Integer.toHexString(codePoint).toUpperCase();
+        String minimalHex = Integer.toHexString(codePoint).toUpperCase();
+        while (minimalHex.length() < 4) {
+            minimalHex = "0"+minimalHex;
+        }
+        return "U+"+minimalHex;
     }
 
     /**
