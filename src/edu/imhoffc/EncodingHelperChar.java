@@ -17,12 +17,28 @@ public class EncodingHelperChar {
     }
 
     public EncodingHelperChar(byte[] utf8Bytes) {
-        // Not yet implemented.
+        try {
+            String text = new String(utf8Bytes, "UTF-8");
+            char ch = text.charAt(0);
+
+            //now just init with char
+            this.codePoint = getCodePointFromChar(ch);
+
+        } catch (Exception e) {
+            System.err.println("invalid byte array");
+        }
     }
 
     public EncodingHelperChar(char ch) {
+        this.codePoint = getCodePointFromChar(ch);
+    }
+
+    //helper method
+    private static int getCodePointFromChar(char ch) {
+        //Integer has a nice function to convert Unicode chars directly to their Hex index,
+        // but none to convert directly to Base 10...
         String hexValue = Integer.toHexString(ch);
-        this.codePoint = Integer.parseInt(hexValue, 16);    //parse the hexValue String from base 16 into int (base 10)
+        return Integer.parseInt(hexValue, 16);    //parse the hexValue String from base 16 into int (base 10)
     }
 
     public int getCodePoint() {

@@ -8,6 +8,7 @@ import static org.junit.Assert.*;
 
 public class EncodingHelperCharTest {
 
+    //these are just for convenience, as many instance methods are tested with these 3 cases
     private EncodingHelperChar latinCapsL; //ascii + BMP, U+004C, int code point 76
     private EncodingHelperChar latinSmallLetterZWithDescender; //BMP, U+2C6C, int code point 11372
     private EncodingHelperChar musicalSymbolQuarterRest; //non-BMP, U+1D13D, int code point 119101
@@ -20,19 +21,31 @@ public class EncodingHelperCharTest {
         this.musicalSymbolQuarterRest = new EncodingHelperChar(119101);
     }
 
-    @After
-    public void tearDown() throws Exception {
-        //I guess if we use a Scanner for reading out Unicode file we'd close that here...
-        // but it's probably limited into the EncodingHelpChar's scope, not this scope.
-    }
-
     @Test
     public void testCharacterConstructor() throws Exception {
+        //This also serves as a test for the static helper method getCodePointFromChar(char ch) in EncodingHelperChar
+        // (because the constructor from chars just calls that directly)
+
         EncodingHelperChar latinCapsL = new EncodingHelperChar('L');
         assertEquals(76,latinCapsL.getCodePoint());
 
         EncodingHelperChar latinSmallLetterZWithDescender = new EncodingHelperChar('ⱬ');
         assertEquals(11372, latinSmallLetterZWithDescender.getCodePoint());
+    }
+
+    @Test
+    public void testByteArrayConstructor() throws Exception {
+        //This will fail if the testCharacterConstructor() fails, as they rely (eventually) on the same helper method
+
+        byte[] latinCapsLBytes = {b(76)};
+        EncodingHelperChar latinCapsL = new EncodingHelperChar(latinCapsLBytes);
+
+        byte[] latinSmallLetterZWithDescenderBytes = {b(226), b(177), b(172)};
+        EncodingHelperChar latinSmallLetterZWithDescender = new EncodingHelperChar(latinSmallLetterZWithDescenderBytes);
+
+        byte[] musicalSymbolQuarterRestBytes = {b(240), b(157), b(132), b(189)};
+        EncodingHelperChar musicalSymbolQuarterRest = new EncodingHelperChar(musicalSymbolQuarterRestBytes);
+
     }
 
     @Test
