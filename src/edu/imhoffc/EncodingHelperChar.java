@@ -17,11 +17,28 @@ public class EncodingHelperChar {
     }
 
     public EncodingHelperChar(byte[] utf8Bytes) {
-        // Not yet implemented.
+        try {
+            String text = new String(utf8Bytes, "UTF-8");
+            char ch = text.charAt(0);
+
+            //now just init with char
+            this.codePoint = getCodePointFromChar(ch);
+
+        } catch (Exception e) {
+            System.err.println("invalid byte array");
+        }
     }
 
     public EncodingHelperChar(char ch) {
-        // Not yet implemented.
+        this.codePoint = getCodePointFromChar(ch);
+    }
+
+    //helper method
+    private static int getCodePointFromChar(char ch) {
+        //Integer has a nice function to convert Unicode chars directly to their Hex index,
+        // but none to convert directly to Base 10...
+        String hexValue = Integer.toHexString(ch);
+        return Integer.parseInt(hexValue, 16);    //parse the hexValue String from base 16 into int (base 10)
     }
 
     public int getCodePoint() {
@@ -53,8 +70,11 @@ public class EncodingHelperChar {
      * @return the U+ string for this character
      */
     public String toCodePointString() {
-        // Not yet implemented.
-        return "";
+        String minimalHex = Integer.toHexString(codePoint).toUpperCase();
+        while (minimalHex.length() < 4) {
+            minimalHex = "0"+minimalHex;
+        }
+        return "U+"+minimalHex;
     }
 
     /**
