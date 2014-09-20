@@ -21,7 +21,8 @@ public class EncodingHelperChar {
     }
 
     public EncodingHelperChar(char ch) {
-        // Not yet implemented.
+        String hexValue = Integer.toHexString(ch);
+        this.codePoint = Integer.parseInt(hexValue, 16);    //parse the hexValue String from base 16 into int (base 10)
     }
 
     public int getCodePoint() {
@@ -53,8 +54,7 @@ public class EncodingHelperChar {
      * @return the U+ string for this character
      */
     public String toCodePointString() {
-        // Not yet implemented.
-        return "";
+        return "U+"+Integer.toHexString(codePoint).toUpperCase();
     }
 
     /**

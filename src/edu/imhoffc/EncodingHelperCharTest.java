@@ -27,6 +27,15 @@ public class EncodingHelperCharTest {
     }
 
     @Test
+    public void testCharacterConstructor() throws Exception {
+        EncodingHelperChar latinCapsL = new EncodingHelperChar('L');
+        assertEquals(76,latinCapsL.getCodePoint());
+
+        EncodingHelperChar latinSmallLetterZWithDescender = new EncodingHelperChar('ⱬ');
+        assertEquals(11372, latinSmallLetterZWithDescender.getCodePoint());
+    }
+
+    @Test
     public void testGetCodePoint() throws Exception {
         assertEquals(76,latinCapsL.getCodePoint());
         assertEquals(11372, latinSmallLetterZWithDescender.getCodePoint());
