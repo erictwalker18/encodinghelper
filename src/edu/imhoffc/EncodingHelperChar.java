@@ -63,7 +63,8 @@ public class EncodingHelperChar {
      *
      * @return the UTF-8 byte array for this character
      */
-    public byte[] toUTF8Bytes() throws Exception {
+    @Deprecated
+    public byte[] toUTF8BytesOld() throws Exception {
         System.out.println("Starting"+this.codePoint);
         String tempString = Integer.toBinaryString(this.codePoint);
         int a=tempString.length()-7;
@@ -82,6 +83,12 @@ public class EncodingHelperChar {
             return new byte[]{(byte)(Byte.valueOf(tempString.substring(0,a-24),2)+253),(byte)(Byte.valueOf(tempString.substring(a-24,a-18),2)+128),(byte)(Byte.valueOf(tempString.substring(a-18,a-12),2)+128),(byte)(Byte.valueOf(tempString.substring(a-12,a-6),2)+128),(byte)(Byte.valueOf(tempString.substring(a-6,a),2)+128),(byte)(Byte.valueOf(tempString.substring(a),2)+128)};
         else
             return new byte[]{};
+    }
+
+    public byte[] toUTF8Bytes() throws Exception {
+        char characterRepresentation = (char) this.codePoint;
+        String stringRepresentation = ""+characterRepresentation;
+        return stringRepresentation.getBytes("UTF-8");
     }
 
     /**
