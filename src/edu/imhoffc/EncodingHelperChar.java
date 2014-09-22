@@ -1,5 +1,12 @@
 package edu.imhoffc;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Scanner;
+import java.lang.*;
+
 /**
  * EncodingHelperChar
  *
@@ -57,9 +64,8 @@ public class EncodingHelperChar {
      *
      * @return the UTF-8 byte array for this character
      */
-    public byte[] toUTF8Bytes() {
-        // Not yet implemented.
-        return null;
+    public byte[] toUTF8Bytes() throws Exception {
+        return new StringBuilder("").appendCodePoint(this.codePoint).toString().getBytes();
     }
 
     /**
@@ -70,11 +76,7 @@ public class EncodingHelperChar {
      * @return the U+ string for this character
      */
     public String toCodePointString() {
-        String minimalHex = Integer.toHexString(codePoint).toUpperCase();
-        while (minimalHex.length() < 4) {
-            minimalHex = "0"+minimalHex;
-        }
-        return "U+"+minimalHex;
+        return String.format("U+%04x",this.codePoint).toUpperCase();    //formats the string in hex form with leading 0s
     }
 
     /**
@@ -86,9 +88,13 @@ public class EncodingHelperChar {
      *
      * @return the escaped hexadecimal byte string
      */
-    public String toUTF8StringWithoutQuotes() {
-        // Not yet implemented.
-        return "";
+    public String toUTF8StringWithoutQuotes() throws Exception {
+        byte[] in = toUTF8Bytes();
+        String out = "";
+        for(byte b: in) {
+            out += "\\x"+String.format("%x",b).toUpperCase();     //converts each byte to hex and formats it into a proper String
+        }
+        return out;
     }
 
     /**
@@ -99,7 +105,31 @@ public class EncodingHelperChar {
      * @return this character's Unicode name
      */
     public String getCharacterName() {
-        // Not yet implemented.
+
+        //special cases the char is a private use codepoint:
+        if ((this.codePoint >= 0xE000 && this.codePoint <= 0xF8FF) ||           //private use section of BMP
+                (this.codePoint >= 0xF0000 && this.codePoint <= 0xFFFFD) ||         //private use plane 15
+                    (this.codePoint >= 0x100000 && this.codePoint <= 0x10FFFD)) {       //private use plane 16
+            return String.format("Private Use Codepoint : "+this.toCodePointString());
+        }
+
+        //else look for it in the UnicodeData.txt list
+        try {
+            File file = new File("UnicodeData.txt");
+            Scanner scanner = new Scanner(file);    //file scanner
+            while(scanner.hasNextLine()) {
+                Scanner scan = new Scanner(scanner.nextLine());     //line scanner
+                scan.useDelimiter(";");
+                if(scan.next().equalsIgnoreCase(toCodePointString().substring(2))) {
+                    return scan.next();
+                }
+                scan.close();
+            }
+            scanner.close();
+        }
+        catch(FileNotFoundException e) {
+            e.printStackTrace();
+        }
         return "";
     }
 }
