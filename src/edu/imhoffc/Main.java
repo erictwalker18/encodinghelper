@@ -1,5 +1,7 @@
 package edu.imhoffc;
 
+import org.junit.Test;
+
 import java.util.*;
 
 public class Main {
@@ -15,5 +17,4 @@ public class Main {
         System.out.println();
         System.out.println();
     }
-
 }

@@ -1,5 +1,11 @@
 package edu.imhoffc;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Scanner;
+
 /**
  * EncodingHelperChar
  *
@@ -57,9 +63,25 @@ public class EncodingHelperChar {
      *
      * @return the UTF-8 byte array for this character
      */
-    public byte[] toUTF8Bytes() {
-        // Not yet implemented.
-        return null;
+    public byte[] toUTF8Bytes() throws Exception {
+        System.out.println("Starting"+this.codePoint);
+        String tempString = Integer.toBinaryString(this.codePoint);
+        int a=tempString.length()-7;
+        System.out.println((byte)(Byte.valueOf(tempString.substring(a - 6, a), 2) + 128));
+        if (this.codePoint<0x7F)
+            return new byte[]{(byte)this.codePoint};
+        else if(this.codePoint<0x7FF)
+            return new byte[]{(byte)(Byte.valueOf(tempString.substring(0,a),2)+193),(byte)(Byte.valueOf(tempString.substring(a),2)+128)};
+        else if(this.codePoint<0xFFFF)
+            return new byte[]{(byte) (Byte.valueOf(tempString.substring(0,a-6),2)+225),(byte)(Byte.valueOf(tempString.substring(a - 6, a), 2) + 128), (byte) (Byte.valueOf(tempString.substring(a), 2) + 128)};
+        else if(this.codePoint<0x1FFFFF)
+            return new byte[]{(byte)(Byte.valueOf(tempString.substring(0,a-12),2)+241),(byte)(Byte.valueOf(tempString.substring(a-12,a-6),2)+128),(byte)(Byte.valueOf(tempString.substring(a-6,a),2)+128),(byte)(Byte.valueOf(tempString.substring(a),2)+128)};
+        else if(this.codePoint<0x3FFFFFF)
+            return new byte[]{(byte)(Byte.valueOf(tempString.substring(0,a-18),2)+249),(byte)(Byte.valueOf(tempString.substring(a-18,a-12),2)+128),(byte)(Byte.valueOf(tempString.substring(a-12,a-6),2)+128),(byte)(Byte.valueOf(tempString.substring(a-6,a),2)+128),(byte)(Byte.valueOf(tempString.substring(a),2)+128)};
+        else if(this.codePoint<0x7FFFFFFF)
+            return new byte[]{(byte)(Byte.valueOf(tempString.substring(0,a-24),2)+253),(byte)(Byte.valueOf(tempString.substring(a-24,a-18),2)+128),(byte)(Byte.valueOf(tempString.substring(a-18,a-12),2)+128),(byte)(Byte.valueOf(tempString.substring(a-12,a-6),2)+128),(byte)(Byte.valueOf(tempString.substring(a-6,a),2)+128),(byte)(Byte.valueOf(tempString.substring(a),2)+128)};
+        else
+            return new byte[]{};
     }
 
     /**
@@ -70,7 +92,7 @@ public class EncodingHelperChar {
      * @return the U+ string for this character
      */
     public String toCodePointString() {
-        String minimalHex = Integer.toHexString(codePoint).toUpperCase();
+        String minimalHex = Integer.toHexString(this.codePoint).toUpperCase();
         while (minimalHex.length() < 4) {
             minimalHex = "0"+minimalHex;
         }
@@ -99,7 +121,21 @@ public class EncodingHelperChar {
      * @return this character's Unicode name
      */
     public String getCharacterName() {
-        // Not yet implemented.
+        try {
+            File file = new File("UnicodeData.txt");
+            Scanner scanner = new Scanner(file);
+            while(scanner.hasNextLine()) {
+                Scanner scan = new Scanner(scanner.nextLine());
+                scan.useDelimiter(";");
+                if(scan.next().equalsIgnoreCase(toCodePointString().substring(2))) {
+                    return scan.next();
+                }
+                scan.close();
+            }
+        }
+        catch(FileNotFoundException e) {
+            e.printStackTrace();
+        }
         return "";
     }
 }
