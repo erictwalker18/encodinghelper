@@ -92,11 +92,7 @@ public class EncodingHelperChar {
      * @return the U+ string for this character
      */
     public String toCodePointString() {
-        String minimalHex = Integer.toHexString(this.codePoint).toUpperCase();
-        while (minimalHex.length() < 4) {
-            minimalHex = "0"+minimalHex;
-        }
-        return "U+"+minimalHex;
+        return String.format("U+%04x",this.codePoint).toUpperCase();
     }
 
     /**

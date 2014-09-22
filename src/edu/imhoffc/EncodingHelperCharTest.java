@@ -65,9 +65,9 @@ public class EncodingHelperCharTest {
 
     @Test
     public void testToUTF8Bytes() throws Exception {
-        //byte[] latinCapsLBytes = {b(76)};
+        byte[] latinCapsLBytes = {b(76)};
             //just 76 because it's ascii
-        //assertArrayEquals(latinCapsLBytes, latinCapsL.toUTF8Bytes());
+        assertArrayEquals(latinCapsLBytes, latinCapsL.toUTF8Bytes());
 
         byte[] latinSmallLetterZWithDescenderBytes = {b(226), b(177), b(172)};
         assertArrayEquals(latinSmallLetterZWithDescenderBytes, latinSmallLetterZWithDescender.toUTF8Bytes());
