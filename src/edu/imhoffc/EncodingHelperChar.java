@@ -67,7 +67,7 @@ public class EncodingHelperChar {
         System.out.println("Starting"+this.codePoint);
         String tempString = Integer.toBinaryString(this.codePoint);
         int a=tempString.length()-7;
-        System.out.println((byte)(Byte.valueOf(tempString.substring(a - 6, a), 2) + 128));
+        //System.out.println((byte)(Byte.valueOf(tempString.substring(a - 6, a), 2) + 128));
         if (this.codePoint<0x7F)
             return new byte[]{(byte)this.codePoint};
         else if(this.codePoint<0x7FF)
@@ -104,9 +104,13 @@ public class EncodingHelperChar {
      *
      * @return the escaped hexadecimal byte string
      */
-    public String toUTF8StringWithoutQuotes() {
-        // Not yet implemented.
-        return "";
+    public String toUTF8StringWithoutQuotes() throws Exception {
+        byte[] in = toUTF8Bytes();
+        String out = "";
+        for(byte b: in) {
+            out+="\\x"+String.format("%x",b).toUpperCase();
+        }
+        return out;
     }
 
     /**
