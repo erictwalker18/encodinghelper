@@ -64,8 +64,37 @@ public class EncodingHelperChar {
      *
      * @return the UTF-8 byte array for this character
      */
+<<<<<<< HEAD
     public byte[] toUTF8Bytes() throws Exception {
         return new StringBuilder("").appendCodePoint(this.codePoint).toString().getBytes();
+=======
+    @Deprecated
+    public byte[] toUTF8BytesOld() throws Exception {
+        System.out.println("Starting"+this.codePoint);
+        String tempString = Integer.toBinaryString(this.codePoint);
+        int a=tempString.length()-7;
+        //System.out.println((byte)(Byte.valueOf(tempString.substring(a - 6, a), 2) + 128));
+        if (this.codePoint<0x7F)
+            return new byte[]{(byte)this.codePoint};
+        else if(this.codePoint<0x7FF)
+            return new byte[]{(byte)(Byte.valueOf(tempString.substring(0,a),2)+193),(byte)(Byte.valueOf(tempString.substring(a),2)+128)};
+        else if(this.codePoint<0xFFFF)
+            return new byte[]{(byte) (Byte.valueOf(tempString.substring(0,a-6),2)+225),(byte)(Byte.valueOf(tempString.substring(a - 6, a), 2) + 128), (byte) (Byte.valueOf(tempString.substring(a), 2) + 128)};
+        else if(this.codePoint<0x1FFFFF)
+            return new byte[]{(byte)(Byte.valueOf(tempString.substring(0,a-12),2)+241),(byte)(Byte.valueOf(tempString.substring(a-12,a-6),2)+128),(byte)(Byte.valueOf(tempString.substring(a-6,a),2)+128),(byte)(Byte.valueOf(tempString.substring(a),2)+128)};
+        else if(this.codePoint<0x3FFFFFF)
+            return new byte[]{(byte)(Byte.valueOf(tempString.substring(0,a-18),2)+249),(byte)(Byte.valueOf(tempString.substring(a-18,a-12),2)+128),(byte)(Byte.valueOf(tempString.substring(a-12,a-6),2)+128),(byte)(Byte.valueOf(tempString.substring(a-6,a),2)+128),(byte)(Byte.valueOf(tempString.substring(a),2)+128)};
+        else if(this.codePoint<0x7FFFFFFF)
+            return new byte[]{(byte)(Byte.valueOf(tempString.substring(0,a-24),2)+253),(byte)(Byte.valueOf(tempString.substring(a-24,a-18),2)+128),(byte)(Byte.valueOf(tempString.substring(a-18,a-12),2)+128),(byte)(Byte.valueOf(tempString.substring(a-12,a-6),2)+128),(byte)(Byte.valueOf(tempString.substring(a-6,a),2)+128),(byte)(Byte.valueOf(tempString.substring(a),2)+128)};
+        else
+            return new byte[]{};
+>>>>>>> 903657e211f89e550699a53a2889a1cc38db4642
+    }
+
+    public byte[] toUTF8Bytes() throws Exception {
+        char characterRepresentation = (char) this.codePoint;
+        String stringRepresentation = ""+characterRepresentation;
+        return stringRepresentation.getBytes("UTF-8");
     }
 
     /**
@@ -76,7 +105,7 @@ public class EncodingHelperChar {
      * @return the U+ string for this character
      */
     public String toCodePointString() {
-        return String.format("U+%04x",this.codePoint).toUpperCase();
+        return String.format("U+%04x",this.codePoint).toUpperCase();    //formats the string in hex form with leading 0s
     }
 
     /**
@@ -92,7 +121,7 @@ public class EncodingHelperChar {
         byte[] in = toUTF8Bytes();
         String out = "";
         for(byte b: in) {
-            out+="\\x"+String.format("%x",b).toUpperCase();
+            out += "\\x"+String.format("%x",b).toUpperCase();     //converts each byte to hex and formats it into a proper String
         }
         return out;
     }
@@ -105,17 +134,27 @@ public class EncodingHelperChar {
      * @return this character's Unicode name
      */
     public String getCharacterName() {
+
+        //special cases the char is a private use codepoint:
+        if ((this.codePoint >= 0xE000 && this.codePoint <= 0xF8FF) ||           //private use section of BMP
+                (this.codePoint >= 0xF0000 && this.codePoint <= 0xFFFFD) ||         //private use plane 15
+                    (this.codePoint >= 0x100000 && this.codePoint <= 0x10FFFD)) {       //private use plane 16
+            return String.format("Private Use Codepoint : "+this.toCodePointString());
+        }
+
+        //else look for it in the UnicodeData.txt list
         try {
             File file = new File("UnicodeData.txt");
-            Scanner scanner = new Scanner(file);
+            Scanner scanner = new Scanner(file);    //file scanner
             while(scanner.hasNextLine()) {
-                Scanner scan = new Scanner(scanner.nextLine());
+                Scanner scan = new Scanner(scanner.nextLine());     //line scanner
                 scan.useDelimiter(";");
                 if(scan.next().equalsIgnoreCase(toCodePointString().substring(2))) {
                     return scan.next();
                 }
                 scan.close();
             }
+            scanner.close();
         }
         catch(FileNotFoundException e) {
             e.printStackTrace();
