@@ -6,18 +6,18 @@ import java.util.*;
 
 public class Main {
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception {
 
         //----- PART 1: Set up using inputted flags
 
         //the inputed char, codepoint, string, or bytes that we'll do calculations on
         String data = null;
         //defined here for the extra bit of scope, but might be assigned via an arg while scanning the input
-        //starts as nil because it may be that the user does not input an arg for data
+        //starts as null because it may be that the user does not input an arg for data
 
         InputType inType = InputType.STRING;  //by default
         boolean assignedInType = false;
-        OutputType outType = OutputType.SUMMERY; //by default
+        OutputType outType = OutputType.SUMMARY; //by default
         boolean assignedOutType = false;
 
         //scan for flags
@@ -31,7 +31,7 @@ public class Main {
                 }
                 
                 //assign inType
-                String flagValue = currentToken.replaceFirst("--inputtype","");
+                String flagValue = currentToken.replaceFirst("--inputtype=","");
                 inType = getInputTypeFromString(flagValue);
                 assignedInType = true;
 
@@ -54,7 +54,7 @@ public class Main {
                 }
                 
                 //assign outType
-                String flagValue = currentToken.replaceFirst("--outputtype","");
+                String flagValue = currentToken.replaceFirst("--outputtype=","");
                 outType = getOutputTypeFromString(flagValue);
                 assignedOutType = true;
 
@@ -62,7 +62,7 @@ public class Main {
                 if (outType == OutputType.INVALID) {
                     System.out.println("Invalid output type: " + flagValue +
                             "\n The output types are: " +
-                            "\n Summery," +
+                            "\n Summary," +
                             "\n String," +
                             "\n UTF8," +
                             "\n Codepoint");
@@ -70,6 +70,7 @@ public class Main {
             }
             else {
                 data = args[i];
+                System.out.println(data);
             }
         }
 
@@ -88,14 +89,19 @@ public class Main {
                     }
                     break;
                 case UTF8:
-
+                    byte[] myBytes = new byte[(data.length()-2)/4];
+                    for (int i = 0; i < data.length(); i++) {
+                        myBytes[i] = Byte.parseByte(data.substring(4*i+3, 4*i+5),16);
+                    }
+                    unicodeCharacters.add(new EncodingHelperChar(myBytes));
                     break;
                 case CODEPOINT:
-
+                    unicodeCharacters.add(new EncodingHelperChar(Integer.parseInt(data.substring(2),16)));
                     break;
             }
         } else {
             //do whatever it is we're supposed to do when we don't get any real input
+            //I don't know what we're supposed to do when we don't get real input
 
         }
 
@@ -103,23 +109,47 @@ public class Main {
 
         //Use a switch statement on 'outType' to output the requested data
         switch (outType) {
-            case SUMMERY:
+            case SUMMARY:
                 if(unicodeCharacters.size() == 1) {
-                    //do full summery
+                    //do full summary
+                    System.out.println(
+                            "Character: " + new String(unicodeCharacters.get(0).toUTF8Bytes(),"UTF-8") +
+                            "\nCode Point: " + unicodeCharacters.get(0).toCodePointString() +
+                            "\nName: " + unicodeCharacters.get(0).getCharacterName() +
+                            "\nUTF-8: " + unicodeCharacters.get(0).toUTF8StringWithoutQuotes());
 
                 } else {
-                    //do shorter summery
+                    //do shorter summary
+                    String written = "";
+                    String codepoints = "";
+                    String utf8 = "";
+                    for (EncodingHelperChar c: unicodeCharacters) {
+                        written = " " + new String(c.toUTF8Bytes(), "UTF-8");
+                        codepoints+= " " + c.toCodePointString();
+                        utf8+= c.toUTF8StringWithoutQuotes();
+                    }
+                    System.out.println(
+                            "String:" + written +
+                            "\nCode Points:" + codepoints +
+                            "\nUTF-8: " + utf8);
                 }
 
                 break;
             case STRING:
-
+                System.out.println(unicodeCharacters.size());
+                for (EncodingHelperChar c: unicodeCharacters)
+                    System.out.print(new String(c.toUTF8Bytes(), "UTF-8"));
                 break;
             case UTF8:
-
+                for (EncodingHelperChar c: unicodeCharacters)
+                    System.out.print(c.toUTF8StringWithoutQuotes());
                 break;
             case CODEPOINT:
-
+                for (int i = 0; i < unicodeCharacters.size(); i++) {
+                    System.out.print(unicodeCharacters.get(i).toCodePointString());
+                    if (i<unicodeCharacters.size()-2)
+                        System.out.print(" ");
+                }
                 break;
         }
     }
@@ -146,13 +176,13 @@ public class Main {
     }
 
     private enum OutputType {
-        SUMMERY, STRING, UTF8, CODEPOINT,
+        SUMMARY, STRING, UTF8, CODEPOINT,
         INVALID
     }
 
     private static OutputType getOutputTypeFromString(String s) {
-        if (s.equalsIgnoreCase("summery")) {
-            return OutputType.SUMMERY;
+        if (s.equalsIgnoreCase("summary")) {
+            return OutputType.SUMMARY;
         } else if (s.equalsIgnoreCase("string")) {
             return OutputType.STRING;
         } else if (s.equalsIgnoreCase("utf8") || (s.equalsIgnoreCase("utf-8"))) {
