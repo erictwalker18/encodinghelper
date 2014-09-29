@@ -6,6 +6,5 @@ package edu.imhoffc;
 public class tester {
     public static void main(String[] args) {
         System.out.println((byte)Integer.parseInt("U+ABCD".substring(2,4),16));
-
     }
 }

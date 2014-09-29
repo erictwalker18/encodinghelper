@@ -2,6 +2,9 @@ package edu.imhoffc;
 
 import org.junit.Test;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.*;
 
 public class Main {
@@ -19,6 +22,20 @@ public class Main {
         boolean assignedInType = false;
         OutputType outType = OutputType.SUMMARY; //by default
         boolean assignedOutType = false;
+
+        //if no arguments are given, then the standard input is used
+        if (args.length == 0) {
+            try {
+                BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+                args = br.readLine().split(" ");
+            } catch (IOException io) {
+                io.printStackTrace();
+            }
+        }
+        //if there are still no arguments, then the program exits with a useful error message
+        if (args.length==0) {
+            System.err.print("No arguments entered. Please try again.");
+        }
 
         //scan for flags
         for (int i=0; i<args.length; i++) {
@@ -70,7 +87,6 @@ public class Main {
             }
             else {
                 data = args[i];
-                System.out.println(data);
             }
         }
 
@@ -80,29 +96,41 @@ public class Main {
         ArrayList<EncodingHelperChar> unicodeCharacters = new ArrayList<EncodingHelperChar>();
         //an array in case they passed in multiple letters
 
-        if (data != null) {
-            //Use a switch statement on 'inType' to read the input data correctly
-            switch (inType) {
-                case STRING:
-                    for (int i=0 ; i<data.length(); i++) {
-                        unicodeCharacters.add(new EncodingHelperChar(data.charAt(i)));
+        //Use a switch statement on 'inType' to read the input data correctly
+        switch (inType) {
+            case STRING:
+                for (int i=0 ; i<data.length(); i++) {
+                    unicodeCharacters.add(new EncodingHelperChar(data.charAt(i)));
+                }
+                break;
+            case UTF8:
+                ArrayList<Byte> bytesInChar = new ArrayList<Byte>();
+                boolean isFirstInSeq = true;
+                int numBytesLeft = 0;
+                for (int i = 0; i < (data.length()-2)/4; i++) {
+                    Byte thisByte = Integer.decode("0x" + data.substring(4 * i + 3, 4 * i + 5)).byteValue();
+                    if (isFirstInSeq) {
+                        bytesInChar.clear();
+                        numBytesLeft = getNumBytesInSeq(thisByte)-1;
+                        isFirstInSeq = false;
                     }
-                    break;
-                case UTF8:
-                    byte[] myBytes = new byte[(data.length()-2)/4];
-                    for (int i = 0; i < data.length(); i++) {
-                        myBytes[i] = Byte.parseByte(data.substring(4*i+3, 4*i+5),16);
+                    else {
+                        numBytesLeft--;
                     }
-                    unicodeCharacters.add(new EncodingHelperChar(myBytes));
-                    break;
-                case CODEPOINT:
-                    unicodeCharacters.add(new EncodingHelperChar(Integer.parseInt(data.substring(2),16)));
-                    break;
-            }
-        } else {
-            //do whatever it is we're supposed to do when we don't get any real input
-            //I don't know what we're supposed to do when we don't get real input
-
+                    bytesInChar.add(thisByte);
+                    if (numBytesLeft == 0) {
+                        byte[] out = new byte[bytesInChar.size()];
+                        for (int j = 0; j<bytesInChar.size(); j++) {
+                            out[j] = (byte)bytesInChar.get(j);
+                        }
+                        unicodeCharacters.add(new EncodingHelperChar(out));
+                        isFirstInSeq = true;
+                    }
+                }
+                break;
+            case CODEPOINT:
+                unicodeCharacters.add(new EncodingHelperChar(Integer.parseInt(data.substring(2),16)));
+                break;
         }
 
         //----- Part 3: Return the data the user wants
@@ -112,7 +140,7 @@ public class Main {
             case SUMMARY:
                 if(unicodeCharacters.size() == 1) {
                     //do full summary
-                    System.out.println(
+                    System.out.print(
                             "Character: " + new String(unicodeCharacters.get(0).toUTF8Bytes(),"UTF-8") +
                             "\nCode Point: " + unicodeCharacters.get(0).toCodePointString() +
                             "\nName: " + unicodeCharacters.get(0).getCharacterName() +
@@ -124,21 +152,21 @@ public class Main {
                     String codepoints = "";
                     String utf8 = "";
                     for (EncodingHelperChar c: unicodeCharacters) {
-                        written = " " + new String(c.toUTF8Bytes(), "UTF-8");
+                        written += new String(c.toUTF8Bytes(), "UTF-8");
                         codepoints+= " " + c.toCodePointString();
                         utf8+= c.toUTF8StringWithoutQuotes();
                     }
-                    System.out.println(
-                            "String:" + written +
+                    System.out.print(
+                            "String: " + written +
                             "\nCode Points:" + codepoints +
                             "\nUTF-8: " + utf8);
                 }
 
                 break;
             case STRING:
-                System.out.println(unicodeCharacters.size());
-                for (EncodingHelperChar c: unicodeCharacters)
+                for (EncodingHelperChar c: unicodeCharacters) {
                     System.out.print(new String(c.toUTF8Bytes(), "UTF-8"));
+                }
                 break;
             case UTF8:
                 for (EncodingHelperChar c: unicodeCharacters)
@@ -191,6 +219,27 @@ public class Main {
             return OutputType.CODEPOINT;
         } else {
             return OutputType.INVALID;
+        }
+    }
+
+    private static int getNumBytesInSeq(byte firstByte) {
+        if (firstByte<-64||firstByte>0) {
+            return 1;
+        }
+        else if (firstByte<-32) {
+            return 2;
+        }
+        else if (firstByte<-16) {
+            return 3;
+        }
+        else if (firstByte<-8) {
+            return 4;
+        }
+        else if (firstByte<-4) {
+            return 5;
+        }
+        else {
+            return 6;
         }
     }
 
