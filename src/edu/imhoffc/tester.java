@@ -5,6 +5,13 @@ package edu.imhoffc;
  */
 public class tester {
     public static void main(String[] args) {
-        System.out.println((byte)Integer.parseInt("U+ABCD".substring(2,4),16));
+        String[] thingy = {"--inputtype=utf8","--outputtype=STRING","'\\xC3\\xAA\\x74\\x72\\x65'"} ;
+        try {
+            Main.main(thingy);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        //System.out.println((byte)Integer.parseInt("U+ABCD".substring(2,4),16));
     }
 }

@@ -33,7 +33,7 @@ public class Main {
             }
         }
         //if there are still no arguments, then the program exits with a useful error message
-        if (args.length==0) {
+        if (args.length == 0) {
             System.err.print("No arguments entered. Please try again.");
         }
 
@@ -130,6 +130,7 @@ public class Main {
                 break;
             case CODEPOINT:
                 unicodeCharacters.add(new EncodingHelperChar(Integer.parseInt(data.substring(2),16)));
+                //substringed by two, because it includes "U+"
                 break;
         }
 
@@ -145,7 +146,6 @@ public class Main {
                             "\nCode Point: " + unicodeCharacters.get(0).toCodePointString() +
                             "\nName: " + unicodeCharacters.get(0).getCharacterName() +
                             "\nUTF-8: " + unicodeCharacters.get(0).toUTF8StringWithoutQuotes());
-
                 } else {
                     //do shorter summary
                     String written = "";
@@ -161,7 +161,6 @@ public class Main {
                             "\nCode Points:" + codepoints +
                             "\nUTF-8: " + utf8);
                 }
-
                 break;
             case STRING:
                 for (EncodingHelperChar c: unicodeCharacters) {
